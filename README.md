@@ -1,6 +1,6 @@
 # Digital-Clock
 
-![](C:\Users\92summer\OneDrive\桌面\VID_20220417_232555_x264.gif)
+![](Digital\VID_20220417_232555_x264.gif)
 
 ## 程序开发
 
