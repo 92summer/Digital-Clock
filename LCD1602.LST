@@ -1,0 +1,161 @@
+C51 COMPILER V9.00   LCD1602                                                               04/17/2022 23:06:00 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN ..\hex OUTPUT\LCD1602.obj
+COMPILER INVOKED BY: G:\51开发板标配资料V3_3\5、程序开发软件\keil4\C51\BIN\C51.EXE LCD1602.c BROWSE DEBUG OBJECTEXTEND O
+                    -BJECT(..\hex OUTPUT\LCD1602.obj)
+
+line level    source
+
+   1          #include "LCD1602.h"
+   2          #include <STC89C5xRC.H>
+   3          #include "delay.h"
+   4          #include "ds1302.h"
+   5          
+   6          extern unsigned char DT[];
+   7          
+   8          void Busy_wait()//读写检测
+   9          {
+  10   1              bit ifbusy;
+  11   1              /*读状态*/
+  12   1              RS = command;
+  13   1              RW = read;
+  14   1              do
+  15   1              {
+  16   2                      EN = 1;
+  17   2                      ifbusy = D7;
+  18   2                      EN = 0;
+  19   2              }while(ifbusy);
+  20   1      }
+  21          
+  22          void WriteData(unsigned char Data)
+  23          {
+  24   1              Busy_wait();
+  25   1              RS = DATA;
+  26   1              RW = write;
+  27   1              DB = Data;
+  28   1              EN = 1;
+  29   1              delay(5);
+  30   1              EN = 0;         //产生高脉冲
+  31   1      }
+  32          
+  33          void WriteCmd(unsigned char cmd)
+  34          {
+  35   1              Busy_wait();
+  36   1              RS = command;
+  37   1              RW = write;
+  38   1              DB = cmd;
+  39   1              EN = 1;
+  40   1              delay(5);
+  41   1              EN = 0; 
+  42   1      }
+  43          
+  44          
+  45          
+  46          void LCDInit(unsigned char mode,bit cmod)
+  47          {
+  48   1              WriteCmd(0x3f);//设置16*2显示，5*7点阵，8位数据接口
+  49   1              /*
+  50   1              0x0c开显示;      mode==3
+  51   1              0x0e开光标;      mode==2
+  52   1              0x0f光标闪烁 mode==1
+  53   1              */
+  54   1              switch(mode)
+C51 COMPILER V9.00   LCD1602                                                               04/17/2022 23:06:00 PAGE 2   
+
+  55   1              {
+  56   2                      case 1: WriteCmd(0x0f);break;
+  57   2                      case 2: WriteCmd(0x0e);break;
+  58   2                      case 3: WriteCmd(0x0c);break;
+  59   2              }
+  60   1              WriteCmd(0x01); //数据指针和显示清零
+  61   1              /*
+  62   1              0x04光标指针-1（左移），cmod==0
+  63   1              0x06光标指针+1（右移），cmod==1
+  64   1              */
+  65   1              if(cmod)
+  66   1                      WriteCmd(0x06);
+  67   1              else
+  68   1                      WriteCmd(0x04);
+  69   1      }
+  70          
+  71          void LCDWriteChar(unsigned char x, unsigned char y, char s)
+  72          {
+  73   1              if(y == 1)//第一行
+  74   1              {
+  75   2                      WriteCmd(0x80 | x);     
+  76   2              }
+  77   1              else if(y == 0)//第二行
+  78   1              {
+  79   2                      WriteCmd(0xc0 | x);
+  80   2              }
+  81   1              WriteData(s);
+  82   1      }
+  83          
+  84          void LCDWriteStr(unsigned char x, unsigned char y, char *str)
+  85          {
+  86   1              char *ps = str;
+  87   1      
+  88   1              if(y == 1)//第一行
+  89   1              {
+  90   2                      WriteCmd(0x80 | x);     
+  91   2              }
+  92   1              else if(y == 0)//第二行
+  93   1              {
+  94   2                      WriteCmd(0xc0 | x);
+  95   2              }
+  96   1              
+  97   1              while(*ps)
+  98   1              {
+  99   2                      WriteData(*ps);
+ 100   2                      ps++;
+ 101   2              }
+ 102   1      }
+ 103          
+ 104          void display_date_and_time()
+ 105          {
+ 106   1              //年份--20XX年
+ 107   1              LCDWriteChar(7,1,DT[6]/10+48);
+ 108   1              LCDWriteChar(8,1,DT[6]%10+48);
+ 109   1      
+ 110   1              LCDWriteChar(9,1,'-');
+ 111   1              //月份--
+ 112   1              LCDWriteChar(10,1,DT[4]/10+48);
+ 113   1              LCDWriteChar(11,1,DT[4]%10+48);
+ 114   1      
+ 115   1              LCDWriteChar(12,1,'-');
+ 116   1              //日--
+C51 COMPILER V9.00   LCD1602                                                               04/17/2022 23:06:00 PAGE 3   
+
+ 117   1              LCDWriteChar(13,1,DT[3]/10+48);
+ 118   1              LCDWriteChar(14,1,DT[3]%10+48);
+ 119   1      
+ 120   1              //时--
+ 121   1              LCDWriteChar(6,0,DT[2]/10+48);
+ 122   1              LCDWriteChar(7,0,DT[2]%10+48);
+ 123   1      
+ 124   1              LCDWriteChar(8,0,':');
+ 125   1              //分--
+ 126   1              LCDWriteChar(9,0,DT[1]/10+48);
+ 127   1              LCDWriteChar(10,0,DT[1]%10+48);
+ 128   1      
+ 129   1              LCDWriteChar(11,0,':');
+ 130   1              //秒--
+ 131   1              LCDWriteChar(12,0,DT[0]/10+48);
+ 132   1              LCDWriteChar(13,0,DT[0]%10+48);
+ 133   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    434    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

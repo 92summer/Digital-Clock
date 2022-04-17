@@ -1,0 +1,151 @@
+C51 COMPILER V9.00   DS1302                                                                04/17/2022 23:06:00 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DS1302
+OBJECT MODULE PLACED IN ..\hex OUTPUT\ds1302.obj
+COMPILER INVOKED BY: G:\51开发板标配资料V3_3\5、程序开发软件\keil4\C51\BIN\C51.EXE ds1302.c BROWSE DEBUG OBJECTEXTEND OB
+                    -JECT(..\hex OUTPUT\ds1302.obj)
+
+line level    source
+
+   1          #include "ds1302.h"
+   2          #include "delay.h"
+   3          #include <STC89C5xRC.H>
+   4          
+   5          /**
+   6          6--年 5--周 4--月 3--日 2--时 1--分 0--秒
+   7          **/
+   8          unsigned char DT[7]={30,6,23,17,4,7,22};
+   9          
+  10          void DS1302WriteByte(unsigned char dat)
+  11          {
+  12   1              unsigned char i;
+  13   1              SCLK=0;//初始时钟线置为 0
+  14   1              delay(2);
+  15   1              for(i=0;i<8;i++)//开始传输 8 个字节的数据
+  16   1              {
+  17   2                      SDA=dat&0x01;//取最低位，注意DS1302 的数据和地址都是从最低位开始传输的
+  18   2                      delay(2);
+  19   2                      SCLK=1;//时钟线拉高，制造上升沿， SDA 的数据被传输
+  20   2                      delay(2);
+  21   2                      SCLK=0;//时钟线拉低，为下一个上升沿做准备
+  22   2                      dat>>=1;//数据右移一位，准备传输下一位数据
+  23   2              }
+  24   1      }
+  25          
+  26          unsigned char DS1302ReadByte()
+  27          {
+  28   1              unsigned char i,dat;
+  29   1              delay(2);
+  30   1              for(i=0;i<8;i++)
+  31   1              {
+  32   2                      dat>>=1;//要返回的数据左移一位
+  33   2                      if(SDA==1)//当数据线为高时，证明该位数据为 1
+  34   2                              dat|=0x80;///要传输数据的当前值置为 1, 若不是,则为 0
+  35   2                      SCLK=1;//拉高时钟线
+  36   2                      delay(2);
+  37   2                      SCLK=0;//制造下降沿
+  38   2                      delay(2);
+  39   2              }
+  40   1              return dat;//返回读取出的数据
+  41   1      }
+  42          
+  43          
+  44          unsigned char DS1302ReadAddr(unsigned char addr)
+  45          {
+  46   1              unsigned char dat;
+  47   1              RST=0;//初始 CE 线置为 0
+  48   1              SCLK=0;//初始时钟线置为 0
+  49   1              RST=1;//初始 CE 置为 1，传输开始
+  50   1              DS1302WriteByte(addr);//传输命令字，要读取的时间/日历地址
+  51   1              dat=DS1302ReadByte();//读取要得到的时间/日期
+  52   1              SCLK=1;//时钟线拉高
+  53   1              RST=0;//读取结束，CE 置为 0，结束数据的传输
+  54   1              return dat;//返回得到的时间/日期
+C51 COMPILER V9.00   DS1302                                                                04/17/2022 23:06:00 PAGE 2   
+
+  55   1      }
+  56          
+  57          void DS1302WriteAddr(unsigned char addr, unsigned char dat)
+  58          {
+  59   1              RST=0; //初始 CE 线置为 0
+  60   1              SCLK=0; //初始时钟线置为 0
+  61   1              RST=1; //初始 CE 置为 1，传输开始
+  62   1              DS1302WriteByte(addr); //传输命令字，要写入的时间/日历地址
+  63   1              DS1302WriteByte(dat); //写入要修改的时间/日期
+  64   1              SCLK=1; //时钟线拉高
+  65   1              RST=0; //读取结束，CE 置为 0，结束数据的传输
+  66   1      }
+  67          
+  68          unsigned char BCD_to_DEC(unsigned char BCD)
+  69          {
+  70   1              unsigned char DEC;
+  71   1              DEC = BCD&0x0f;
+  72   1          BCD >>= 4;
+  73   1          DEC += 10*(BCD&0x0f);
+  74   1          return DEC;
+  75   1      }
+  76          
+  77          unsigned char DEC_to_BCD(unsigned char DEC)
+  78          {
+  79   1          unsigned char BCD;
+  80   1          BCD = DEC % 10;//个位
+  81   1          DEC /= 10;
+  82   1          DEC <<= 4;
+  83   1          DEC &= 0xf0;
+  84   1          BCD |= DEC;//十位
+  85   1          return BCD;
+  86   1      }
+  87          
+  88          
+  89          void DS1302TimeInit()
+  90          {
+  91   1              unsigned char i;
+  92   1              DS1302WriteAddr(0x8e,0x00);//关写保护
+  93   1              RST = 0;
+  94   1              SDA = 0;
+  95   1              RST = 1;//使能端拉高，开始写数据
+  96   1              DS1302WriteByte(0xbe);//开写突发
+  97   1              for ( i = 0; i < 7; i++)
+  98   1              {
+  99   2                      DS1302WriteAddr(DS1302_W_FIRSTADDR+2*i, DEC_to_BCD(DT[i]));
+ 100   2              }       
+ 101   1      
+ 102   1              DS1302WriteAddr(0x8e,0x80);//开写保护
+ 103   1      }
+ 104          
+ 105          void ReadTime()
+ 106          {
+ 107   1              unsigned char i;
+ 108   1              unsigned char temp;
+ 109   1              DS1302WriteAddr(0x8e,0x00);//关写保护
+ 110   1              RST = 0;
+ 111   1              SDA = 0;
+ 112   1              RST = 1;//使能端拉高，开始写数据
+ 113   1              DS1302WriteByte(0xbf);//开写突读
+ 114   1      
+ 115   1              for ( i = 0; i < 7; i++)
+ 116   1              {
+C51 COMPILER V9.00   DS1302                                                                04/17/2022 23:06:00 PAGE 3   
+
+ 117   2                      temp = DS1302ReadAddr(DS1302_R_FIRSTADDR+2*i);
+ 118   2                      temp = BCD_to_DEC(temp);
+ 119   2                      DT[i] = temp;
+ 120   2              }
+ 121   1      
+ 122   1              DS1302WriteAddr(0x8e,0x80);//开写保护
+ 123   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    295    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      7       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
