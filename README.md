@@ -1,6 +1,6 @@
 # Digital-Clock
 
-![image](VID_20220417_232555_x264.gif)
+![image](https://github.com/92summer/Digital-Clock/blob/main/VID_20220417_232555_x264.gif)
 
 ## 程序开发
 
