@@ -1,4 +1,4 @@
-# Digital-Clock(By C51)
+# 日历时钟(By STC89C52RC)
 
 ![image](https://github.com/92summer/Digital-Clock/blob/main/VID_20220417_232555_x264.gif)
 
@@ -14,6 +14,7 @@ Keil4
 |  2   |     DS1302模块     |  1   |
 |  3   |   DC-DC降压模块    |  1   |
 |  4   | STC89C52RC最小系统 |  1   |
+|  5   |      ds18b02      |  1   |
 
 ## 实物引脚分布
 
@@ -29,6 +30,11 @@ Keil4
 #define RST P25
 #define SDA P24
 #define SCLK P23
+```  
+
+```c
+/*ds18b02*/
+#define ds18 P26
 ```
 
 ## 时间初始化
@@ -39,3 +45,6 @@ Keil4
 unsigned char DT[7]={30,6,23,17,4,7,22};
 ```
 
+## 2022.4.23更新：添加温度显示  
+![image]()  
+ds18b02  
