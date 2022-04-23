@@ -1,5 +1,7 @@
 #include<intrins.h>
+#define MAIN_Fosc		11059200UL	//å®å®šä¹‰ä¸»æ—¶é’ŸHZ
 
-void delay(unsigned int z);//ÑÓÊ±zºÁÃë
-
+void delay(unsigned int z);//å»¶æ—¶zæ¯«ç§’
 void Delay200ms();
+void Delay_Ms(unsigned int ms);
+void Delay_us(unsigned char us);
