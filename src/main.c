@@ -2,18 +2,20 @@
 #include "LCD1602.h"
 #include "ds1302.h"
 #include "delay.h"
+#include "ds18b02.h"
 
-unsigned char temp;
+unsigned char temp;//ä¸­é—´è½¬æ¢å˜é‡
+
 
 int main()
 {
  	
 	LCDInit(3,1);
 	//LCDWriteStr(0,1,"Date:20");
-	LCDWriteStr(5,1,"20");
-	LCDWriteStr(0,0,"Now~");
+	LCDWriteStr(3,1,"20");
+	//LCDWriteStr(0,0,"Now~");
 
-	DS1302WriteAddr(0x90,0x00);//¹Ø DS1302 ³äµç
+	DS1302WriteAddr(0x90,0x00);//å…³ DS1302 å……ç”µ
 	temp = DS1302ReadAddr(0x91);
 	if (temp == 0x00)
 	DS1302TimeInit();	
@@ -21,6 +23,10 @@ int main()
 	{
 		display_date_and_time();
 		ReadTime();
+		
+		display_temperature();
+		ReadTemperature();
+
 	 	Delay200ms();	
 	}
 	
