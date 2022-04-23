@@ -24,3 +24,19 @@ void Delay200ms()		//@11.0592MHz
 	} while (--i);
 }
 
+/*
+*输入：ms：要延时的毫秒
+=================================================*/
+void Delay_Ms(unsigned int ms)
+{
+     unsigned int i;
+	 do{
+	      i = MAIN_Fosc / 96000; 
+		  while(--i);   //96T per loop
+     }while(--ms);
+}
+
+void Delay_us(unsigned char us)
+{
+	while(us--);	
+}
