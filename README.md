@@ -46,5 +46,5 @@ unsigned char DT[7]={30,6,23,17,4,7,22};
 ```
 
 ## 2022.4.23更新：添加温度显示  
-![image]()  
+![image](https://github.com/92summer/Digital-Clock/blob/main/VID_20220423_184103_0_COMPRESSED_x265.gif)  
 ds18b02  
