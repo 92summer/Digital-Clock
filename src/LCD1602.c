@@ -5,10 +5,10 @@
 
 extern unsigned char DT[];
 
-void Busy_wait()//¶ÁĞ´¼ì²â
+void Busy_wait()//è¯»å†™æ£€æµ‹
 {
 	bit ifbusy;
-	/*¶Á×´Ì¬*/
+	/*è¯»çŠ¶æ€*/
 	RS = command;
 	RW = read;
 	do
@@ -27,7 +27,7 @@ void WriteData(unsigned char Data)
 	DB = Data;
 	EN = 1;
 	delay(5);
-	EN = 0;		//²úÉú¸ßÂö³å
+	EN = 0;		//äº§ç”Ÿé«˜è„‰å†²
 }
 
 void WriteCmd(unsigned char cmd)
@@ -45,11 +45,11 @@ void WriteCmd(unsigned char cmd)
 
 void LCDInit(unsigned char mode,bit cmod)
 {
- 	WriteCmd(0x3f);//ÉèÖÃ16*2ÏÔÊ¾£¬5*7µãÕó£¬8Î»Êı¾İ½Ó¿Ú
+ 	WriteCmd(0x3f);//è®¾ç½®16*2æ˜¾ç¤ºï¼Œ5*7ç‚¹é˜µï¼Œ8ä½æ•°æ®æ¥å£
 	/*
-	0x0c¿ªÏÔÊ¾;	 mode==3
-	0x0e¿ª¹â±ê;	 mode==2
-	0x0f¹â±êÉÁË¸ mode==1
+	0x0cå¼€æ˜¾ç¤º;	 mode==3
+	0x0eå¼€å…‰æ ‡;	 mode==2
+	0x0få…‰æ ‡é—ªçƒ mode==1
 	*/
 	switch(mode)
 	{
@@ -57,10 +57,10 @@ void LCDInit(unsigned char mode,bit cmod)
 		case 2: WriteCmd(0x0e);break;
 		case 3: WriteCmd(0x0c);break;
 	}
-	WriteCmd(0x01);	//Êı¾İÖ¸ÕëºÍÏÔÊ¾ÇåÁã
+	WriteCmd(0x01);	//æ•°æ®æŒ‡é’ˆå’Œæ˜¾ç¤ºæ¸…é›¶
 	/*
-	0x04¹â±êÖ¸Õë-1£¨×óÒÆ£©£¬cmod==0
-	0x06¹â±êÖ¸Õë+1£¨ÓÒÒÆ£©£¬cmod==1
+	0x04å…‰æ ‡æŒ‡é’ˆ-1ï¼ˆå·¦ç§»ï¼‰ï¼Œcmod==0
+	0x06å…‰æ ‡æŒ‡é’ˆ+1ï¼ˆå³ç§»ï¼‰ï¼Œcmod==1
 	*/
 	if(cmod)
 		WriteCmd(0x06);
@@ -70,11 +70,11 @@ void LCDInit(unsigned char mode,bit cmod)
 
 void LCDWriteChar(unsigned char x, unsigned char y, char s)
 {
- 	if(y == 1)//µÚÒ»ĞĞ
+ 	if(y == 1)//ç¬¬ä¸€è¡Œ
 	{
 	 	WriteCmd(0x80 | x);	
 	}
-	else if(y == 0)//µÚ¶şĞĞ
+	else if(y == 0)//ç¬¬äºŒè¡Œ
 	{
 	 	WriteCmd(0xc0 | x);
 	}
@@ -85,11 +85,11 @@ void LCDWriteStr(unsigned char x, unsigned char y, char *str)
 {
 	char *ps = str;
 
-	if(y == 1)//µÚÒ»ĞĞ
+	if(y == 1)//ç¬¬ä¸€è¡Œ
 	{
 	 	WriteCmd(0x80 | x);	
 	}
-	else if(y == 0)//µÚ¶şĞĞ
+	else if(y == 0)//ç¬¬äºŒè¡Œ
 	{
 	 	WriteCmd(0xc0 | x);
 	}
@@ -103,31 +103,31 @@ void LCDWriteStr(unsigned char x, unsigned char y, char *str)
 
 void display_date_and_time()
 {
-	//Äê·İ--20XXÄê
-	LCDWriteChar(7,1,DT[6]/10+48);
-	LCDWriteChar(8,1,DT[6]%10+48);
+	//å¹´ä»½--20XXå¹´
+	LCDWriteChar(5,1,DT[6]/10+48);
+	LCDWriteChar(6,1,DT[6]%10+48);
 
-	LCDWriteChar(9,1,'-');
-	//ÔÂ·İ--
-	LCDWriteChar(10,1,DT[4]/10+48);
-	LCDWriteChar(11,1,DT[4]%10+48);
+	LCDWriteChar(7,1,'-');
+	//æœˆä»½--
+	LCDWriteChar(8,1,DT[4]/10+48);
+	LCDWriteChar(9,1,DT[4]%10+48);
 
-	LCDWriteChar(12,1,'-');
-	//ÈÕ--
-	LCDWriteChar(13,1,DT[3]/10+48);
-	LCDWriteChar(14,1,DT[3]%10+48);
+	LCDWriteChar(10,1,'-');
+	//æ—¥--
+	LCDWriteChar(11,1,DT[3]/10+48);
+	LCDWriteChar(12,1,DT[3]%10+48);
 
-	//Ê±--
-	LCDWriteChar(6,0,DT[2]/10+48);
-	LCDWriteChar(7,0,DT[2]%10+48);
+	//æ—¶--
+	LCDWriteChar(8,0,DT[2]/10+48);
+	LCDWriteChar(9,0,DT[2]%10+48);
 
-	LCDWriteChar(8,0,':');
-	//·Ö--
-	LCDWriteChar(9,0,DT[1]/10+48);
-	LCDWriteChar(10,0,DT[1]%10+48);
+	LCDWriteChar(10,0,':');
+	//åˆ†--
+	LCDWriteChar(11,0,DT[1]/10+48);
+	LCDWriteChar(12,0,DT[1]%10+48);
 
-	LCDWriteChar(11,0,':');
-	//Ãë--
-	LCDWriteChar(12,0,DT[0]/10+48);
-	LCDWriteChar(13,0,DT[0]%10+48);
+	LCDWriteChar(13,0,':');
+	//ç§’--
+	LCDWriteChar(14,0,DT[0]/10+48);
+	LCDWriteChar(15,0,DT[0]%10+48);
 }
